@@ -266,6 +266,7 @@ def compute_class_weights(labels_dir, label_values):
     class_pixels = np.zeros(num_classes) 
 
     total_pixels = 0.0
+    """
 
     for n in range(len(image_files)):
         image = imread(image_files[n])
@@ -284,7 +285,10 @@ def compute_class_weights(labels_dir, label_values):
     class_pixels = np.delete(class_pixels, index_to_delete)
 
     class_weights = total_pixels / class_pixels
-    class_weights = class_weights / np.sum(class_weights)
+    class_weights = tf.constant(class_weights / np.sum(class_weights))
+    """
+    # import pdb;pdb.set_trace()
+    class_weights = tf.constant([[1.0, 2.0, 3.0, 10.0]])
 
     return class_weights
 

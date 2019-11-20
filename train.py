@@ -82,6 +82,7 @@ for class_name in class_names_list:
         class_names_string = class_names_string + class_name
 
 num_classes = len(label_values)
+print("class num; ", num_classes)
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -90,11 +91,23 @@ sess=tf.Session(config=config)
 
 # Compute your softmax cross entropy loss
 net_input = tf.placeholder(tf.float32,shape=[None,None,None,3])
-net_output = tf.placeholder(tf.float32,shape=[None,None,None,num_classes])
+net_output = tf.placeholder(tf.int32,shape=[None,None,None,num_classes])
 
 network, init_fn = model_builder.build_model(model_name=args.model, frontend=args.frontend, net_input=net_input, num_classes=num_classes, crop_width=args.crop_width, crop_height=args.crop_height, is_training=True)
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=network, labels=net_output))
+
+"""
+# https://github.com/kwotsin/TensorFlow-ENet/blob/8bb8322b343f65fa8740f731d31fcb361d8546f7/train_enet.py#L127
+print("===================weigth loss=======================")
+# add weights
+print(net_output.shape)
+class_weights = utils.compute_class_weights(labels_dir=args.dataset + "/train_labels", label_values=label_values)
+weights = net_output * class_weights
+weights = tf.reduce_sum(weights, 3)
+loss = tf.losses.softmax_cross_entropy(onehot_labels=net_output, logits=network, weights=weights)
+"""
+print(loss.shape)
 
 opt = tf.train.RMSPropOptimizer(learning_rate=0.0001, decay=0.995).minimize(loss, var_list=[var for var in tf.trainable_variables()])
 
