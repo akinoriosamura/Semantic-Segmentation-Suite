@@ -37,19 +37,24 @@ def create_images_dataset(imgs_p, saved_dir):
     print("processing : ", saved_dir)
     os.makedirs(saved_dir, exist_ok=True)
     for im_p in imgs_p:
-        img = cv2.imread(str(im_p))
+        im_p = str(im_p)
+        img = Image.open(str(im_p))
+        import pdb;pdb.set_trace()
+        print(np.array(img).shape)
         # img = np.array(img.resize((512, 512), Image.BILINEAR))
+        im_p = str(im_p)[:-4] + ".png"
         im_base = os.path.basename(im_p)
-        cv2.imwrite('{}/{}'.format(saved_dir, im_base), img)
-
+        img.save('{}/{}'.format(saved_dir, im_base))
 
 def create_annotations_dataset(annos_p, saved_dir):
     print("processing : ", saved_dir)
     os.makedirs(saved_dir, exist_ok=True)
     for anno_p in annos_p:
-        anno = np.array(cv2.imread(str(anno_p)))
+        anno = Image.open(str(anno_p))
+        import pdb;pdb.set_trace()
+        print(np.array(anno).shape)
         anno_base = os.path.basename(anno_p)
-        cv2.imwrite('{}/{}'.format(saved_dir, anno_base), anno)
+        anno.save('{}/{}'.format(saved_dir, anno_base))
 
 
 def _convert_and_save_dataset(face_data, face_sep_mask, mask_path, output_dir):
@@ -65,7 +70,8 @@ def _convert_and_save_dataset(face_data, face_sep_mask, mask_path, output_dir):
                 'l_eye': [0,195,0],
                 'r_eye': [0,195,0],
                 'u_lip': [128, 0, 0],
-                'l_lip': [128, 0, 0]
+                'l_lip': [128, 0, 0],
+                'mouth': [0, 200, 193]
                 }
 
             all_atts = {
@@ -105,6 +111,7 @@ def _convert_and_save_dataset(face_data, face_sep_mask, mask_path, output_dir):
                 if os.path.exists(path):
                     counter += 1
                     anno = np.array(cv2.imread(path))
+                    anno = cv2.resize(anno, target_img.shape[:2])
                     sep_mask[np.where((anno == white).all(axis=2))] = att_rgb
                     # print(np.unique(sep_mask))
 
@@ -118,10 +125,11 @@ def _convert_and_save_dataset(face_data, face_sep_mask, mask_path, output_dir):
                 if os.path.exists(path):
                     counter += 1
                     anno = np.array(cv2.imread(path))
+                    anno = cv2.resize(anno, target_img.shape[:2])
                     sep_mask[np.where((anno == white).all(axis=2))] = block
 
             # save mask by same raw image name but png
-            cv2.imwrite('{}/{}.png'.format(mask_path, j), sep_mask)
+            cv2.imwrite('{}/{}_gt.png'.format(mask_path, j), sep_mask)
 
     # get images and masks and split and save
     p_images = pathlib.Path(face_data)
@@ -131,6 +139,7 @@ def _convert_and_save_dataset(face_data, face_sep_mask, mask_path, output_dir):
     # remove no images data
     image_bases = [os.path.basename(img)[:-4] for img in images]
     annotations = [anno for anno in annotations if os.path.basename(anno)[:-4] in image_bases]
+    import pdb;pdb.set_trace()
     assert len(images) == len(annotations), "dont match length images and annotation"
     images.sort()
     annotations.sort()

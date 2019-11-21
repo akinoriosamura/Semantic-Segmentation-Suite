@@ -22,7 +22,7 @@
 set -e
 
 CURRENT_DIR=$(pwd)
-WORK_DIR="/data/segmentation"
+WORK_DIR="./"
 mkdir -p "${WORK_DIR}"
 cd "${WORK_DIR}"
 
