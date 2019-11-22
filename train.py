@@ -182,8 +182,8 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
     st = time.time()
     epoch_st=time.time()
 
-    # for i in range(num_iters):
-    for i in range(1):
+    for i in range(num_iters):
+    # for i in range(1):
         # st=time.time()
 
         input_image_batch = []
