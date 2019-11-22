@@ -42,7 +42,7 @@ def prepare_data(dataset_dir):
     return train_input_names,train_output_names, val_input_names, val_output_names, test_input_names, test_output_names
 
 def load_image(path):
-    image = cv2.cvtColor(cv2.imread(path,-1), cv2.COLOR_BGR2RGB)
+    image = cv2.imread(path,-1)
     return image
 
 # Takes an absolute file path and returns the name of the file without th extension

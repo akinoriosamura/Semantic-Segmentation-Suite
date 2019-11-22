@@ -95,8 +95,8 @@ for ind in range(len(test_input_names)):
     
     gt = helpers.colour_code_segmentation(gt, label_values)
 
-    cv2.imwrite("%s/%s_pred.png"%("Test", file_name),cv2.cvtColor(np.uint8(out_vis_image), cv2.COLOR_RGB2BGR))
-    cv2.imwrite("%s/%s_gt.png"%("Test", file_name),cv2.cvtColor(np.uint8(gt), cv2.COLOR_RGB2BGR))
+    cv2.imwrite("%s/%s_pred.png"%("Test", file_name),np.uint8(out_vis_image))
+    cv2.imwrite("%s/%s_gt.png"%("Test", file_name),np.uint8(gt))
 
 
 target.close()

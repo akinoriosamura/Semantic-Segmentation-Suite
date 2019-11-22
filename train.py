@@ -261,6 +261,7 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
             else:
                 input_image = np.expand_dims(np.float32(cv2.resize(input_image, (args.img_height, args.img_width))),axis=0)/255.0
                 gt = cv2.resize(gt, (args.img_height, args.img_width))
+
             gt = helpers.reverse_one_hot(helpers.one_hot_it(gt, label_values))
 
             # st = time.time()
@@ -291,8 +292,8 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
 
             file_name = os.path.basename(val_input_names[ind])
             file_name = os.path.splitext(file_name)[0]
-            cv2.imwrite("%s/%04d/%s_pred.png"%("checkpoints",epoch, file_name),cv2.cvtColor(np.uint8(out_vis_image), cv2.COLOR_RGB2BGR))
-            cv2.imwrite("%s/%04d/%s_gt.png"%("checkpoints",epoch, file_name),cv2.cvtColor(np.uint8(gt), cv2.COLOR_RGB2BGR))
+            cv2.imwrite("%s/%04d/%s_pred.png"%("checkpoints",epoch, file_name),np.uint8(out_vis_image))
+            cv2.imwrite("%s/%04d/%s_gt.png"%("checkpoints",epoch, file_name),np.uint8(gt))
 
 
         target.close()

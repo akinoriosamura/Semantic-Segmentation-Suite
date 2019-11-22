@@ -66,7 +66,7 @@ def one_hot_it(label, label_values):
     for colour in label_values:
         # colour_map = np.full((label.shape[0], label.shape[1], label.shape[2]), colour, dtype=int)
         equality = np.equal(label, colour)
-        class_map = np.all(equality, axis = -1)
+        class_map = np.all(equality, axis=-1)
         semantic_map.append(class_map)
     semantic_map = np.stack(semantic_map, axis=-1)
     # print("Time 2 = ", time.time() - st)
@@ -96,7 +96,7 @@ def reverse_one_hot(image):
     #         index, value = max(enumerate(image[i, j, :]), key=operator.itemgetter(1))
     #         x[i, j] = index
 
-    x = np.argmax(image, axis = -1)
+    x = np.argmax(image, axis=-1)
     return x
 
 
