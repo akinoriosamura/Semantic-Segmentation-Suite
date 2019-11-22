@@ -29,7 +29,7 @@ def download_checkpoints(model_name):
 
 
 
-def build_model(model_name, net_input, num_classes, crop_width, crop_height, frontend="ResNet101", is_training=True):
+def build_model(model_name, net_input, num_classes, img_width, img_height, frontend="ResNet101", is_training=True):
 	# Get the selected model. 
 	# Some of them require pre-trained ResNet
 
@@ -68,7 +68,7 @@ def build_model(model_name, net_input, num_classes, crop_width, crop_height, fro
 	elif model_name == "PSPNet":
 	    # Image size is required for PSPNet
 	    # PSPNet requires pre-trained ResNet weights
-	    network, init_fn = build_pspnet(net_input, label_size=[crop_height, crop_width], preset_model = model_name, frontend=frontend, num_classes=num_classes, is_training=is_training)
+	    network, init_fn = build_pspnet(net_input, label_size=[img_height, img_width], preset_model = model_name, frontend=frontend, num_classes=num_classes, is_training=is_training)
 	elif model_name == "GCN":
 	    # GCN requires pre-trained ResNet weights
 	    network, init_fn = build_gcn(net_input, preset_model = model_name, frontend=frontend, num_classes=num_classes, is_training=is_training)

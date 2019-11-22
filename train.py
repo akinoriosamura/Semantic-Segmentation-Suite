@@ -35,8 +35,9 @@ parser.add_argument('--validation_step', type=int, default=1, help='How often to
 parser.add_argument('--image', type=str, default=None, help='The image you want to predict on. Only valid in "predict" mode.')
 parser.add_argument('--continue_training', type=str2bool, default=False, help='Whether to continue training from a checkpoint')
 parser.add_argument('--dataset', type=str, default="CamVid", help='Dataset you are using.')
-parser.add_argument('--crop_height', type=int, default=512, help='Height of cropped input image to network')
-parser.add_argument('--crop_width', type=int, default=512, help='Width of cropped input image to network')
+parser.add_argument('--crop_or_resize', type=str, default="resize", help='crop or resize of input')
+parser.add_argument('--img_height', type=int, default=512, help='Height of input image to network')
+parser.add_argument('--img_width', type=int, default=512, help='Width of input image to network')
 parser.add_argument('--batch_size', type=int, default=1, help='Number of images in each batch')
 parser.add_argument('--num_val_images', type=int, default=20, help='The number of images to used for validations')
 parser.add_argument('--h_flip', type=str2bool, default=False, help='Whether to randomly flip the image horizontally for data augmentation')
@@ -50,7 +51,11 @@ args = parser.parse_args()
 
 def data_augmentation(input_image, output_image):
     # Data augmentation
-    input_image, output_image = utils.random_crop(input_image, output_image, args.crop_height, args.crop_width)
+    if args.crop_or_resize == "crop":
+        input_image, output_image = utils.random_crop(input_image, output_image, args.img_height, args.img_width)
+    else:
+        input_image = cv2.resize(input_image, (args.img_height, args.img_width))
+        output_image = cv2.resize(output_image, (args.img_height, args.img_width))
 
     if args.h_flip and random.randint(0,1):
         input_image = cv2.flip(input_image, 1)
@@ -93,7 +98,7 @@ sess=tf.Session(config=config)
 net_input = tf.placeholder(tf.float32,shape=[None,None,None,3])
 net_output = tf.placeholder(tf.int32,shape=[None,None,None,num_classes])
 
-network, init_fn = model_builder.build_model(model_name=args.model, frontend=args.frontend, net_input=net_input, num_classes=num_classes, crop_width=args.crop_width, crop_height=args.crop_height, is_training=True)
+network, init_fn = model_builder.build_model(model_name=args.model, frontend=args.frontend, net_input=net_input, num_classes=num_classes, img_width=args.img_width, img_height=args.img_height, is_training=True)
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=network, labels=net_output))
 
@@ -136,8 +141,9 @@ train_input_names,train_output_names, val_input_names, val_output_names, test_in
 print("\n***** Begin training *****")
 print("Dataset -->", args.dataset)
 print("Model -->", args.model)
-print("Crop Height -->", args.crop_height)
-print("Crop Width -->", args.crop_width)
+print("crop or resize -->", args.crop_or_resize)
+print("img Height -->", args.img_height)
+print("img Width -->", args.img_width)
 print("Num Epochs -->", args.num_epochs)
 print("Batch Size -->", args.batch_size)
 print("Num Classes -->", num_classes)
@@ -175,7 +181,9 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
     num_iters = int(np.floor(len(id_list) / args.batch_size))
     st = time.time()
     epoch_st=time.time()
-    for i in range(num_iters):
+
+    # for i in range(num_iters):
+    for i in range(1):
         # st=time.time()
 
         input_image_batch = []
@@ -230,7 +238,6 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
         print("Saving checkpoint for this epoch")
         saver.save(sess,"%s/%04d/model.ckpt"%("checkpoints",epoch))
 
-
     if epoch % args.validation_step == 0:
         print("Performing validation")
         target=open("%s/%04d/val_scores.csv"%("checkpoints",epoch),'w')
@@ -244,12 +251,16 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
         f1_list = []
         iou_list = []
 
-
         # Do the validation on a small set of validation images
         for ind in val_indices:
-
-            input_image = np.expand_dims(np.float32(utils.load_image(val_input_names[ind])[:args.crop_height, :args.crop_width]),axis=0)/255.0
-            gt = utils.load_image(val_output_names[ind])[:args.crop_height, :args.crop_width]
+            input_image = utils.load_image(val_input_names[ind])
+            gt = utils.load_image(val_output_names[ind])
+            if args.crop_or_resize == "crop":
+                input_image = np.expand_dims(np.float32(input_image[:args.img_height, :args.img_width]),axis=0)/255.0
+                gt = gt[:args.img_height, :args.img_width]
+            else:
+                input_image = np.expand_dims(np.float32(cv2.resize(input_image, (args.img_height, args.img_width))),axis=0)/255.0
+                gt = cv2.resize(gt, (args.img_height, args.img_width))
             gt = helpers.reverse_one_hot(helpers.one_hot_it(gt, label_values))
 
             # st = time.time()
