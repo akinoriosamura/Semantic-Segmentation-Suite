@@ -227,8 +227,8 @@ with tf.Graph().as_default() as graph:
                     utils.LOG(string_print)
                     st = time.time()
 
-                if cnt % 100 == 0:
-                    break
+                #if cnt % 100 == 0:
+                #    break
 
             mean_loss = np.mean(current_losses)
             avg_loss_per_epoch.append(mean_loss)
