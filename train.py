@@ -95,8 +95,8 @@ sess=tf.Session(config=config)
 
 
 # Compute your softmax cross entropy loss
-net_input = tf.placeholder(tf.float32,shape=[None,None,None,3])
-net_output = tf.placeholder(tf.int32,shape=[None,None,None,num_classes])
+net_input = tf.placeholder(tf.float32,shape=[None,None,None,3], name='input')
+net_output = tf.placeholder(tf.int32,shape=[None,None,None,num_classes], name='output')
 
 network, init_fn = model_builder.build_model(model_name=args.model, frontend=args.frontend, net_input=net_input, num_classes=num_classes, img_width=args.img_width, img_height=args.img_height, is_training=True)
 

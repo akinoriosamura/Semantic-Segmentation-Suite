@@ -2,14 +2,16 @@ import os,time,cv2, sys, math
 import tensorflow as tf
 import argparse
 import numpy as np
+import cv2
 
 from utils import utils, helpers
 from builders import model_builder
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--checkpoint_path', type=str, default=None, required=True, help='The path to the latest checkpoint weights for your model.')
-parser.add_argument('--crop_height', type=int, default=512, help='Height of cropped input image to network')
-parser.add_argument('--crop_width', type=int, default=512, help='Width of cropped input image to network')
+parser.add_argument('--crop_or_resize', type=str, default="resize", help='crop or resize of input')
+parser.add_argument('--img_height', type=int, default=512, help='Height of cropped input image to network')
+parser.add_argument('--img_width', type=int, default=512, help='Width of cropped input image to network')
 parser.add_argument('--model', type=str, default=None, required=True, help='The model you are using')
 parser.add_argument('--dataset', type=str, default="CamVid", required=False, help='The dataset you are using')
 args = parser.parse_args()
@@ -31,10 +33,10 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 sess=tf.Session(config=config)
 
-net_input = tf.placeholder(tf.float32,shape=[None,None,None,3])
-net_output = tf.placeholder(tf.float32,shape=[None,None,None,num_classes]) 
+net_input = tf.placeholder(tf.float32,shape=[None,None,None,3], name='input')
+net_output = tf.placeholder(tf.float32,shape=[None,None,None,num_classes], name='output') 
 
-network, _ = model_builder.build_model(args.model, net_input=net_input, num_classes=num_classes, crop_width=args.crop_width, crop_height=args.crop_height, is_training=False)
+network, _ = model_builder.build_model(args.model, net_input=net_input, num_classes=num_classes, img_width=args.img_width, img_height=args.img_height, is_training=False)
 
 sess.run(tf.global_variables_initializer())
 
@@ -60,13 +62,22 @@ f1_list = []
 iou_list = []
 run_times_list = []
 
+import pdb;pdb.set_trace()
+
 # Run testing on ALL test images
 for ind in range(len(test_input_names)):
     sys.stdout.write("\rRunning test image %d / %d"%(ind+1, len(test_input_names)))
     sys.stdout.flush()
 
-    input_image = np.expand_dims(np.float32(utils.load_image(test_input_names[ind])[:args.crop_height, :args.crop_width]),axis=0)/255.0
-    gt = utils.load_image(test_output_names[ind])[:args.crop_height, :args.crop_width]
+    input_image = utils.load_image(test_input_names[ind])
+    gt = utils.load_image(test_output_names[ind])
+    if args.crop_or_resize == "crop":
+        input_image = np.expand_dims(np.float32(input_image[:args.img_height, :args.img_width]),axis=0)/255.0
+        gt = gt[:args.img_height, :args.img_width]
+    else:
+        input_image = np.expand_dims(np.float32(cv2.resize(input_image, (args.img_height, args.img_width))),axis=0)/255.0
+        gt = cv2.resize(gt, (args.img_height, args.img_width))
+
     gt = helpers.reverse_one_hot(helpers.one_hot_it(gt, label_values))
 
     st = time.time()
