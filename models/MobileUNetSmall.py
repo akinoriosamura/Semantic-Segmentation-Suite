@@ -85,7 +85,7 @@ def build_mobile_unet_small(inputs, preset_model, num_classes, is_training):
     }
     weight_decay = 5e-5
 
-    depth_multi = 1
+    depth_multi = 0.25
     def depth(d):
         min_depth=8
         return max(int(d * depth_multi), min_depth)
@@ -104,7 +104,7 @@ def build_mobile_unet_small(inputs, preset_model, num_classes, is_training):
         # Downsampling path #
         #####################
         print(inputs.name, inputs.get_shape())
-        # inputs -> 32 ->16
+        # inputs -> 16
         net = invertedresidual(inputs, stride=1, up_sample=1, channel=16, depth=depth, scope='net1/inresidual')
         skip_1 = net
 
