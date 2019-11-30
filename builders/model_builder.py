@@ -8,6 +8,7 @@ from models.Encoder_Decoder import build_encoder_decoder
 from models.RefineNet import build_refinenet
 from models.FRRN import build_frrn
 from models.MobileUNet import build_mobile_unet
+from models.MobileUNetSmall import build_mobile_unet_small
 from models.PSPNet import build_pspnet
 from models.GCN import build_gcn
 from models.DeepLabV3 import build_deeplabv3
@@ -19,7 +20,7 @@ from models.DDSC import build_ddsc
 from models.BiSeNet import build_bisenet
 
 SUPPORTED_MODELS = ["FC-DenseNet56", "FC-DenseNet67", "FC-DenseNet103", "Encoder-Decoder", "Encoder-Decoder-Skip", "RefineNet",
-    "FRRN-A", "FRRN-B", "MobileUNet", "MobileUNet-Skip", "PSPNet", "GCN", "DeepLabV3", "DeepLabV3_plus", "AdapNet", 
+    "FRRN-A", "FRRN-B", "MobileUNet", "MobileUNet-Skip", "MobileUNetSmall-Skip", "PSPNet", "GCN", "DeepLabV3", "DeepLabV3_plus", "AdapNet", 
     "DenseASPP", "DDSC", "BiSeNet", "custom"]
 
 SUPPORTED_FRONTENDS = ["ResNet50", "ResNet101", "ResNet152", "MobileNetV2", "InceptionV4"]
@@ -48,7 +49,8 @@ def build_model(model_name, net_input, num_classes, img_width, img_height, front
 	if "ResNet152" == frontend and not os.path.isfile("models/resnet_v2_152.ckpt"):
 	    download_checkpoints("ResNet152")
 	if "MobileNetV2" == frontend and not os.path.isfile("models/mobilenet_v2.ckpt.data-00000-of-00001"):
-	    download_checkpoints("MobileNetV2")
+	    # download_checkpoints("MobileNetV2")
+		pass
 	if "InceptionV4" == frontend and not os.path.isfile("models/inception_v4.ckpt"):
 	    download_checkpoints("InceptionV4") 
 
@@ -64,7 +66,9 @@ def build_model(model_name, net_input, num_classes, img_width, img_height, front
 	elif model_name == "Encoder-Decoder" or model_name == "Encoder-Decoder-Skip":
 	    network = build_encoder_decoder(net_input, preset_model = model_name, num_classes=num_classes)
 	elif model_name == "MobileUNet" or model_name == "MobileUNet-Skip":
-	    network = build_mobile_unet(net_input, preset_model = model_name, num_classes=num_classes)
+	    network = build_mobile_unet(net_input, preset_model = model_name, num_classes=num_classes, is_training=is_training)
+	elif model_name == "MobileUNetSmall-Skip":
+	    network = build_mobile_unet_small(net_input, preset_model = model_name, num_classes=num_classes, is_training=is_training)
 	elif model_name == "PSPNet":
 	    # Image size is required for PSPNet
 	    # PSPNet requires pre-trained ResNet weights
