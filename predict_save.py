@@ -115,11 +115,14 @@ with tf.Graph().as_default() as inf_g:
 
             out_vis_image = helpers.colour_code_segmentation(output_image, label_values)
             file_name = utils.filepath_to_name(image)
-            save_path = os.path.join(args.model_dir, "%s_pred.png"%(file_name))
-            cv2.imwrite(save_path, np.uint8(out_vis_image))
+            save_original_path = os.path.join(args.model_dir, "%s.jpg"%(file_name))
+            print("Wrote image " + "%s"%(save_original_path))
+            cv2.imwrite(save_original_path, loaded_image)
+            save_predict_path = os.path.join(args.model_dir, "%s_pred.png"%(file_name))
+            print("Wrote image " + "%s_pred.png"%(save_predict_path))
+            cv2.imwrite(save_predict_path, np.uint8(out_vis_image))
 
             print("")
-            print("Wrote image " + "%s_pred.png"%(file_name))
 
         print("Finished!")
         create_save_model(args.model_dir, inf_g, sess)
