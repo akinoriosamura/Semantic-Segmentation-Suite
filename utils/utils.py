@@ -45,6 +45,10 @@ def load_image(path):
     image = cv2.imread(path,-1)
     return image
 
+def load_test_image(path):
+    image = cv2.imread(path)
+    return image
+
 # Takes an absolute file path and returns the name of the file without th extension
 def filepath_to_name(full_name):
     file_name = os.path.basename(full_name)
