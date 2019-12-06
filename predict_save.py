@@ -1,7 +1,6 @@
 import os,time,cv2, sys, math
 import tensorflow as tf
 from tensorflow.python.framework import graph_util
-# import coremltools
 import tfcoreml as tf_converter
 import argparse
 import numpy as np
@@ -52,14 +51,11 @@ def create_save_model(model_dir, graph, sess, args):
     print("finish save tflite_model")
 
 
-def create_coreml_model(model_dir):
+def create_coreml_model(model_dir, args):
     # coreml変換
-    save_model_dir = os.path.join(model_dir, "SavedModel")
-    pb_p = os.path.join(save_model_dir, "saved_model.pb")
-    print("pb file path; ", os.path.join(model_dir, "original_frozen.pb"))
     tf_converter.convert(tf_model_path=os.path.join(model_dir, "original_frozen.pb"),
                         mlmodel_path=os.path.join(model_dir, 'mobile_unet.mlmodel'),
-                        input_name_shape_dict={'input:0':[1,256,256,3]},
+                        input_name_shape_dict={'input:0':[1,args.img_height,args.img_width,3]},
                         image_input_names=['input:0'],
                         output_feature_names=['logits/BiasAdd:0']
                         )
@@ -137,4 +133,4 @@ with tf.Graph().as_default() as inf_g:
         print("Finished!")
         create_save_model(args.model_dir, inf_g, sess, args)
 
-create_coreml_model(args.model_dir, inf_g, sess, args)
+create_coreml_model(args.model_dir, args)
