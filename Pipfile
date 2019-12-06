@@ -12,6 +12,7 @@ matplotlib = "*"
 scipy = "==1.2.0"
 pillow = "*"
 sklearn = "*"
+tf-coreml = {git = "https://github.com/akinoriosamura/tf-coreml.git"}
 
 [requires]
 python_version = "3.6"

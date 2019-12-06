@@ -5,7 +5,7 @@ num_quant=64
 dataset=CelebAMask-HQ-skin-eye-lips/
 batch_size=1
 crop_or_resize=resize
-img_size=128
+img_size=256
 model=MobileUNetSmall-Skip
 frontend=MobileNetV2
 # data augment
