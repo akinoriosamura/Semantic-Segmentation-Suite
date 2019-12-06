@@ -52,7 +52,7 @@ def create_save_model(model_dir, graph, sess, args):
     print("finish save tflite_model")
 
 
-def create_coreml_model(model_dir, graph, sess, args):
+def create_coreml_model(model_dir):
     # coreml変換
     save_model_dir = os.path.join(model_dir, "SavedModel")
     pb_p = os.path.join(save_model_dir, "saved_model.pb")
