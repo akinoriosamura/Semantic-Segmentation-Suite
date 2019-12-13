@@ -34,6 +34,7 @@ parser.add_argument('--checkpoint_step', type=int, default=5, help='How often to
 parser.add_argument('--validation_step', type=int, default=1, help='How often to perform validation (epochs)')
 parser.add_argument('--image', type=str, default=None, help='The image you want to predict on. Only valid in "predict" mode.')
 parser.add_argument('--continue_training', type=str2bool, default=False, help='Whether to continue training from a checkpoint')
+parser.add_argument('--model_checkpoint_path', type=str, default="", help='checkpoint path')
 parser.add_argument('--dataset', type=str, default="CamVid", help='Dataset you are using.')
 parser.add_argument('--crop_or_resize', type=str, default="resize", help='crop or resize of input')
 parser.add_argument('--img_height', type=int, default=512, help='Height of input image to network')
@@ -131,10 +132,11 @@ with tf.Graph().as_default() as graph:
             init_fn(sess)
 
         # Load a previous checkpoint if desired
-        model_checkpoint_name = "checkpoints/latest_model_" + args.model + "_" + args.dataset + ".ckpt"
-        if args.continue_training:
+        # import pdb;pdb.set_trace()
+        if args.model_checkpoint_path != "":
             print('Loaded latest model checkpoint')
-            saver.restore(sess, model_checkpoint_name)
+            print(args.model_checkpoint_path)
+            saver.restore(sess, args.model_checkpoint_path)
 
         # Load the data
         print("Loading the data ...")
@@ -144,6 +146,7 @@ with tf.Graph().as_default() as graph:
 
         print("\n***** Begin training *****")
         print("Dataset -->", args.dataset)
+        print("checkpoint -->", args.model_checkpoint_path)
         print("Model -->", args.model)
         print("crop or resize -->", args.crop_or_resize)
         print("img Height -->", args.img_height)
@@ -239,6 +242,7 @@ with tf.Graph().as_default() as graph:
 
             # Save latest checkpoint to same file name
             print("Saving latest checkpoint")
+            model_checkpoint_name = "checkpoints/latest_model_" + args.model + "_" + args.dataset + ".ckpt"
             saver.save(sess,model_checkpoint_name)
 
             if val_indices != 0 and epoch % args.checkpoint_step == 0:
