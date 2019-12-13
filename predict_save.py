@@ -1,6 +1,7 @@
 import os,time,cv2, sys, math
 import tensorflow as tf
 from tensorflow.python.framework import graph_util
+import tfcoreml as tf_converter
 import argparse
 import numpy as np
 import glob
@@ -13,14 +14,12 @@ def listup_files(path):
     for p in glob.glob(path + "/*"):
         yield p
 
-def create_save_model(model_dir, graph, sess):
-    # save graphdef file to pb
+def create_save_model(model_dir, graph, sess, args):
     print("Save frozen graph")
     graphdef_n = "original_frozen.pb"
     graph_def = graph_util.convert_variables_to_constants(
         sess, graph.as_graph_def(), ["logits/BiasAdd"])
     tf.train.write_graph(graph_def, model_dir, graphdef_n, as_text=False)
-
     # save SavedModel
     print("get tensor")
     net_input = graph.get_tensor_by_name('input:0')
@@ -32,27 +31,34 @@ def create_save_model(model_dir, graph, sess):
     signature = tf.saved_model.predict_signature_def(
         {"input": net_input}, outputs={"logits/BiasAdd": logits}
     )
-
     # using custom tag instead of: tags=[tf.saved_model.tag_constants.SERVING]
     builder.add_meta_graph_and_variables(
-        sess=sess, tags=[
-            tf.saved_model.tag_constants.SERVING], signature_def_map={
-            tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY: signature})
+        sess=sess,
+        tags=[tf.saved_model.tag_constants.SERVING],
+        signature_def_map={tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY: signature}
+        )
     builder.save()
     print("finish save saved_model")
 
-    # モデルを変換
+    # tflite変換
     converter = tf.lite.TFLiteConverter.from_saved_model(
         save_model_dir
         )
     # converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
     tflite_model = converter.convert()
-
     with open(model_dir + "/mobile_unet.tflite", 'wb') as f:
         f.write(tflite_model)
     print("finish save tflite_model")
 
 
+def create_coreml_model(model_dir, args):
+    # coreml変換
+    tf_converter.convert(tf_model_path=os.path.join(model_dir, "original_frozen.pb"),
+                        mlmodel_path=os.path.join(model_dir, 'mobile_unet.mlmodel'),
+                        input_name_shape_dict={'input:0':[1,args.img_height,args.img_width,3]},
+                        image_input_names=['input:0'],
+                        output_feature_names=['logits/BiasAdd:0']
+                        )
 
 
 parser = argparse.ArgumentParser()
@@ -87,7 +93,7 @@ with tf.Graph().as_default() as inf_g:
         config=config
         )
 
-    with sess.as_default():
+    with sess.as_default() as sess:
         net_input = tf.placeholder(tf.float32,shape=[None,args.img_height,args.img_width,3], name='input')
 
         network, _ = model_builder.build_model(args.model, net_input=net_input, num_classes=num_classes, img_width=args.img_width, img_height=args.img_height, is_training=False)
@@ -125,4 +131,6 @@ with tf.Graph().as_default() as inf_g:
             print("")
 
         print("Finished!")
-        create_save_model(args.model_dir, inf_g, sess)
+        create_save_model(args.model_dir, inf_g, sess, args)
+
+create_coreml_model(args.model_dir, args)
