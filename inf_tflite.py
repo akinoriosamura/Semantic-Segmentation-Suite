@@ -61,16 +61,11 @@ if __name__ == '__main__':
         print("Testing image " + image)
 
         # 入力画像のリサイズ
-        img = Image.open(image).convert('RGB').resize((width, height))
+        loaded_image = utils.load_test_image(image)
+        input_image = np.expand_dims(np.float32(cv2.resize(loaded_image, (width, height))),axis=0)/255.0
 
-        # 入力データの生成
-        input_data = np.expand_dims(img, axis=0)
-
-        # Floatingモデルのデータ変換
-        input_data = np.float32(input_data) / 255
-    
         # 入力をインタプリタに指定
-        interpreter.set_tensor(input_details[0]['index'], input_data)
+        interpreter.set_tensor(input_details[0]['index'], input_image)
 
         # 推論の実行
         interpreter.invoke()
@@ -92,7 +87,7 @@ if __name__ == '__main__':
         save_original_path = os.path.join(args.model_dir, "%s.jpg"%(file_name))
         # print("Wrote image " + "%s"%(save_original_path))
         # cv2.imwrite(save_original_path, img)
-        save_predict_path = os.path.join("./tf2_tflite_test", "%s_pred.png"%(file_name))
+        save_predict_path = os.path.join("./tflite_test", "%s_pred.png"%(file_name))
         print("Wrote image " + "%s"%(save_predict_path))
         cv2.imwrite(save_predict_path, np.uint8(out_vis_image))
 
