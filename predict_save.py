@@ -107,6 +107,8 @@ with tf.Graph().as_default() as inf_g:
         print("Testing predict_imgs " + args.predict_imgs)
 
         for image in listup_files(args.predict_imgs):
+            if ".csv" in image:
+                continue
             print("Testing image " + image)
             loaded_image = utils.load_test_image(image)
             input_image = np.expand_dims(np.float32(cv2.resize(loaded_image, (args.img_height, args.img_width))),axis=0)/255.0
@@ -117,6 +119,7 @@ with tf.Graph().as_default() as inf_g:
             run_time = time.time()-st
 
             output_image = np.array(output_image[0,:,:,:])
+            
             output_image = helpers.reverse_one_hot(output_image)
 
             out_vis_image = helpers.colour_code_segmentation(output_image, label_values)
@@ -125,7 +128,7 @@ with tf.Graph().as_default() as inf_g:
             print("Wrote image " + "%s"%(save_original_path))
             cv2.imwrite(save_original_path, loaded_image)
             save_predict_path = os.path.join(args.model_dir, "%s_pred.png"%(file_name))
-            print("Wrote image " + "%s_pred.png"%(save_predict_path))
+            print("Wrote image " + "%s"%(save_predict_path))
             cv2.imwrite(save_predict_path, np.uint8(out_vis_image))
 
             print("")
