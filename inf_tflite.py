@@ -53,6 +53,8 @@ if __name__ == '__main__':
     height = input_details[0]['shape'][1]
     width = input_details[0]['shape'][2]
 
+    total_t = 0
+    count = 0
     for image in listup_files(args.predict_imgs):
         if ".csv" in image:
             continue
@@ -74,7 +76,13 @@ if __name__ == '__main__':
         interpreter.invoke()
 
         # 出力の取得
+        import time
+        st = time.time()
         output_data = interpreter.get_tensor(output_details[0]['index'])
+        el = time.time() - st
+        count += 1
+        print("el: ", el)
+        total_t += el
         results = np.squeeze(output_data)
 
         output_image = helpers.reverse_one_hot(results)
@@ -82,8 +90,10 @@ if __name__ == '__main__':
         out_vis_image = helpers.colour_code_segmentation(output_image, label_values)
         file_name = utils.filepath_to_name(image)
         save_original_path = os.path.join(args.model_dir, "%s.jpg"%(file_name))
-        print("Wrote image " + "%s"%(save_original_path))
+        # print("Wrote image " + "%s"%(save_original_path))
         # cv2.imwrite(save_original_path, img)
-        save_predict_path = os.path.join("./tflite_test", "%s_pred.png"%(file_name))
+        save_predict_path = os.path.join("./tf2_tflite_test", "%s_pred.png"%(file_name))
         print("Wrote image " + "%s"%(save_predict_path))
         cv2.imwrite(save_predict_path, np.uint8(out_vis_image))
+
+print("ave time: ", total_t / count)

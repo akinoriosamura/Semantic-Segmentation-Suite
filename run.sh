@@ -14,8 +14,10 @@ v_flip=True
 brightness=0.5  # Specifies the max bightness change as a factor between 0.0 and 1.0. For example, 0.1 represents a max brightness change of 10%% (+-).
 rotation=90  # Specifies the max rotation angle in degrees.
 
-ModelDir="aug_dm025_img256_checkpoints/latest_model_MobileUNetSmall-Skip_CelebAMask-HQ-skin-eye-lips/"
+# ModelDir="aug_dm025_img256_checkpoints/latest_model_MobileUNetSmall-Skip_CelebAMask-HQ-skin-eye-lips/"
+ModelDir="growing_1_30_aug_dm025_img256_checkpoints/latest_model_MobileUNetSmall-Skip_annotated_growing_1-30-skin-eye-lips/"
 CheckPoint="${ModelDir}ckpt"
+tflite_model="${ModelDir}tf2_mobile_unet.tflite"
 
 predict_dir="user_test"
 
@@ -71,6 +73,12 @@ elif [ "${phase}" = 'test' ]; then
                     --model=${model} \
                     --checkpoint_path=${CheckPoint}
 
+elif [ "${phase}" = 'tflite' ]; then
+    echo "run tflite"
+    python inf_tflite.py --dataset=${dataset} \
+                    --model_dir=${ModelDir} \
+                    --model=${tflite_model} \
+                    --predict_imgs=${predict_dir}
 else
     echo "no running"
 fi

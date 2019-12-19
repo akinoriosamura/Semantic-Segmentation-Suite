@@ -44,6 +44,7 @@ def create_save_model(model_dir, graph, sess, args):
     converter = tf.lite.TFLiteConverter.from_saved_model(
         save_model_dir
         )
+    converter.allow_custom_ops=True
     # converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
     tflite_model = converter.convert()
     with open(model_dir + "/mobile_unet.tflite", 'wb') as f:
